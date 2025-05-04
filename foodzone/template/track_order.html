@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 position-relative overlay-bottom">
+    <div class="d-flex flex-column align-items-center justify-content-center pt-0 pt-lg-5" style="min-height: 400px">
+        <h1 class="display-4 mb-3 mt-0 mt-lg-5 text-white text-uppercase">Theo dõi đơn hàng</h1>
+        <div class="d-inline-flex mb-lg-5">
+            <p class="m-0 text-white"><a class="text-white" href="{% url 'index' %}">Trang chủ</a></p>
+            <p class="m-0 text-white px-2">/</p>
+            <p class="m-0 text-white"><a class="text-white" href="{% url 'dashboard' %}">Tài khoản</a></p>
+            <p class="m-0 text-white px-2">/</p>
+            <p class="m-0 text-white">Theo dõi đơn hàng #{{ order.id }}</p>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Track Order Start -->
+<div class="container-fluid py-5">
+    <div class="container">
+        {% if message %}
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="alert alert-warning text-center">
+                        <h4>{{ message }}</h4>
+                        <p>Đơn hàng của bạn đã được ghi nhận nhưng chưa được xử lý giao hàng.</p>
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">Quay lại trang tài khoản</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                <!-- Order Info -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Thông tin đơn hàng #{{ order.id }}</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-4">
+                                <img src="{{ order.item.image.url }}" alt="{{ order.item.name }}" class="img-fluid rounded mr-3" style="max-width: 100px;">
+                                <div>
+                                    <h5>{{ order.item.name }}</h5>
+                                    <p class="mb-0">Giá: {{ order.item.discounted_price }}₫</p>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <h5>Chi tiết giao hàng</h5>
+                            <p><strong>Thời gian đặt:</strong> {{ delivery.created_at|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Trạng thái:</strong> 
+                                <span class="badge 
+                                    {% if delivery.status == 'PE' %}badge-secondary
+                                    {% elif delivery.status == 'CO' %}badge-info
+                                    {% elif delivery.status == 'PR' %}badge-primary
+                                    {% elif delivery.status == 'RP' %}badge-warning
+                                    {% elif delivery.status == 'PU' %}badge-warning
+                                    {% elif delivery.status == 'OW' %}badge-info
+                                    {% elif delivery.status == 'DE' %}badge-success
+                                    {% elif delivery.status == 'CA' %}badge-danger
+                                    {% endif %} badge-pill">
+                                    {{ delivery.get_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>Thời gian dự kiến:</strong> {{ delivery.estimated_delivery_time|date:"d/m/Y H:i" }}</p>
+                            {% if delivery.actual_delivery_time %}
+                            <p><strong>Thời gian giao thực tế:</strong> {{ delivery.actual_delivery_time|date:"d/m/Y H:i" }}</p>
+                            {% endif %}
+                            
+                            <hr>
+                            
+                            <h5>Địa chỉ giao hàng</h5>
+                            <address>
+                                {{ delivery.delivery_address.address_line1 }}<br>
+                                {% if delivery.delivery_address.address_line2 %}{{ delivery.delivery_address.address_line2 }}<br>{% endif %}
+                                {{ delivery.delivery_address.city }}, {{ delivery.delivery_address.state }}<br>
+                                {{ delivery.delivery_address.postal_code }}
+                            </address>
+                            
+                            {% if delivery.delivery_notes %}
+                            <div class="alert alert-info mt-3">
+                                <h6 class="alert-heading">Ghi chú giao hàng</h6>
+                                <p class="mb-0">{{ delivery.delivery_notes }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            {% if delivery.shipper %}
+                            <hr>
+                            
+                            <h5>Người giao hàng</h5>
+                            <p><strong>Tên:</strong> {{ delivery.shipper.user.first_name }} {{ delivery.shipper.user.last_name }}</p>
+                            <p><strong>Phương tiện:</strong> {{ delivery.shipper.vehicle_type }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tracking Status -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Trạng thái đơn hàng</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Progress Bar -->
+                            <div class="position-relative mb-5">
+                                <div class="progress" style="height: 3px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 
+                                        {% if delivery.status == 'PE' %}10%
+                                        {% elif delivery.status == 'CO' %}25%
+                                        {% elif delivery.status == 'PR' %}40%
+                                        {% elif delivery.status == 'RP' %}55%
+                                        {% elif delivery.status == 'PU' %}70%
+                                        {% elif delivery.status == 'OW' %}85%
+                                        {% elif delivery.status == 'DE' %}100%
+                                        {% elif delivery.status == 'CA' %}100%
+                                        {% endif %};" 
+                                        aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between position-relative" style="margin-top: -12px;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="rounded-circle 
+                                            {% if delivery.status == 'PE' or delivery.status == 'CO' or delivery.status == 'PR' or delivery.status == 'RP' or delivery.status == 'PU' or delivery.status == 'OW' or delivery.status == 'DE' %}
+                                            bg-success
+                                            {% else %}
+                                            bg-secondary
+                                            {% endif %}" 
+                                            style="width: 20px; height: 20px;"></div>
+                                        <div class="text-center mt-2"><small>Đã đặt</small></div>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="rounded-circle 
+                                            {% if delivery.status == 'CO' or delivery.status == 'PR' or delivery.status == 'RP' or delivery.status == 'PU' or delivery.status == 'OW' or delivery.status == 'DE' %}
+                                            bg-success
+                                            {% else %}
+                                            bg-secondary
+                                            {% endif %}" 
+                                            style="width: 20px; height: 20px;"></div>
+                                        <div class="text-center mt-2"><small>Xác nhận</small></div>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="rounded-circle 
+                                            {% if delivery.status == 'PR' or delivery.status == 'RP' or delivery.status == 'PU' or delivery.status == 'OW' or delivery.status == 'DE' %}
+                                            bg-success
+                                            {% else %}
+                                            bg-secondary
+                                            {% endif %}" 
+                                            style="width: 20px; height: 20px;"></div>
+                                        <div class="text-center mt-2"><small>Chuẩn bị</small></div>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="rounded-circle 
+                                            {% if delivery.status == 'PU' or delivery.status == 'OW' or delivery.status == 'DE' %}
+                                            bg-success
+                                            {% else %}
+                                            bg-secondary
+                                            {% endif %}" 
+                                            style="width: 20px; height: 20px;"></div>
+                                        <div class="text-center mt-2"><small>Lấy hàng</small></div>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="rounded-circle 
+                                            {% if delivery.status == 'OW' or delivery.status == 'DE' %}
+                                            bg-success
+                                            {% else %}
+                                            bg-secondary
+                                            {% endif %}" 
+                                            style="width: 20px; height: 20px;"></div>
+                                        <div class="text-center mt-2"><small>Đang giao</small></div>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="rounded-circle 
+                                            {% if delivery.status == 'DE' %}
+                                            bg-success
+                                            {% else %}
+                                            bg-secondary
+                                            {% endif %}" 
+                                            style="width: 20px; height: 20px;"></div>
+                                        <div class="text-center mt-2"><small>Đã giao</small></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Current Status -->
+                            <div class="alert 
+                                {% if delivery.status == 'PE' %}alert-secondary
+                                {% elif delivery.status == 'CO' %}alert-info
+                                {% elif delivery.status == 'PR' %}alert-primary
+                                {% elif delivery.status == 'RP' %}alert-warning
+                                {% elif delivery.status == 'PU' %}alert-warning
+                                {% elif delivery.status == 'OW' %}alert-info
+                                {% elif delivery.status == 'DE' %}alert-success
+                                {% elif delivery.status == 'CA' %}alert-danger
+                                {% endif %}">
+                                <h5 class="alert-heading">{{ delivery.get_status_display }}</h5>
+                                <p>
+                                    {% if delivery.status == 'PE' %}
+                                        Đơn hàng của bạn đang chờ xác nhận.
+                                    {% elif delivery.status == 'CO' %}
+                                        Đơn hàng của bạn đã được xác nhận và đang được chuẩn bị.
+                                    {% elif delivery.status == 'PR' %}
+                                        Đơn hàng của bạn đang được chuẩn bị.
+                                    {% elif delivery.status == 'RP' %}
+                                        Đơn hàng của bạn đã sẵn sàng và đang chờ người giao hàng đến lấy.
+                                    {% elif delivery.status == 'PU' %}
+                                        Người giao hàng đã lấy đơn hàng của bạn.
+                                    {% elif delivery.status == 'OW' %}
+                                        Đơn hàng của bạn đang được giao đến địa chỉ của bạn.
+                                    {% elif delivery.status == 'DE' %}
+                                        Đơn hàng của bạn đã được giao thành công. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!
+                                    {% elif delivery.status == 'CA' %}
+                                        Đơn hàng của bạn đã bị hủy.
+                                    {% endif %}
+                                </p>
+                                {% if delivery.status == 'OW' and delivery.shipper.current_location %}
+                                    <hr>
+                                    <p class="mb-0">
+                                        <strong>Vị trí hiện tại của người giao hàng:</strong> {{ delivery.shipper.current_location }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Tracking History -->
+                            <h5 class="mt-4 mb-3">Lịch sử cập nhật</h5>
+                            <div class="timeline">
+                                {% for log in tracking_logs %}
+                                    <div class="timeline-item">
+                                        <div class="timeline-item-marker">
+                                            <div class="timeline-item-marker-text">{{ log.timestamp|date:"d/m H:i" }}</div>
+                                            <div class="timeline-item-marker-indicator bg-
+                                                {% if log.status == 'PE' %}secondary
+                                                {% elif log.status == 'CO' %}info
+                                                {% elif log.status == 'PR' %}primary
+                                                {% elif log.status == 'RP' %}warning
+                                                {% elif log.status == 'PU' %}warning
+                                                {% elif log.status == 'OW' %}info
+                                                {% elif log.status == 'DE' %}success
+                                                {% elif log.status == 'CA' %}danger
+                                                {% endif %}">
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item-content pt-0">
+                                            <div class="card mb-4">
+                                                <div class="card-header d-flex justify-content-between align-items-center">
+                                                    <h6 class="mb-0">{{ log.get_status_display }}</h6>
+                                                    <small class="text-muted">{{ log.timestamp|date:"d/m/Y H:i:s" }}</small>
+                                                </div>
+                                                <div class="card-body py-2">
+                                                    {% if log.location %}<p class="mb-1"><small><strong>Vị trí:</strong> {{ log.location }}</small></p>{% endif %}
+                                                    {% if log.notes %}<p class="mb-0"><small>{{ log.notes }}</small></p>{% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="text-center py-4">
+                                        <p class="text-muted">Chưa có thông tin cập nhật nào được ghi lại</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                    <i class="fa fa-arrow-left mr-2"></i> Quay lại trang tài khoản
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+<!-- Track Order End -->
+
+<style>
+    /* Timeline styling */
+    .timeline {
+        position: relative;
+        padding-left: 25px;
+        margin-bottom: 20px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 8px;
+        width: 2px;
+        background-color: #e3e6ec;
+    }
+    
+    .timeline-item {
+        position: relative;
+    }
+    
+    .timeline-item-marker {
+        position: absolute;
+        left: -25px;
+        top: 0;
+    }
+    
+    .timeline-item-marker-text {
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 5px;
+        margin-left: -10px;
+    }
+    
+    .timeline-item-marker-indicator {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+    }
+    
+    .timeline-item-content {
+        padding-bottom: 20px;
+        min-height: 30px;
+    }
+</style>
+
+{% endblock %} 

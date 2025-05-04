@@ -1,0 +1,406 @@
+{% extends 'base1.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+
+<!-- Shipper Dashboard Header Start -->
+<div class="container-fluid page-header mb-5 position-relative overlay-bottom">
+    <div class="d-flex flex-column align-items-center justify-content-center pt-0 pt-lg-5" style="min-height: 400px">
+        <h1 class="display-4 mb-3 mt-0 mt-lg-5 text-white text-uppercase">Bảng điều khiển người giao hàng</h1>
+        <div class="d-inline-flex mb-lg-5">
+            <p class="m-0 text-white"><a class="text-white" href="{% url 'index' %}">Trang chủ</a></p>
+            <p class="m-0 text-white px-2">/</p>
+            <p class="m-0 text-white">Bảng điều khiển</p>
+        </div>
+    </div>
+</div>
+<!-- Shipper Dashboard Header End -->
+
+<!-- Shipper Dashboard Start -->
+<div class="container-fluid py-5">
+    <div class="container">
+        {% if error %}
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="alert alert-danger text-center">
+                        <h4>{{ error }}</h4>
+                        <p>Bạn cần đăng ký làm người giao hàng trước khi truy cập trang này.</p>
+                        <a href="{% url 'register_shipper' %}" class="btn btn-primary mt-3">Đăng ký làm người giao hàng</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            {% if messages %}
+                <div class="row justify-content-center mb-4">
+                    <div class="col-lg-12">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Dashboard Overview Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Tổng đơn đã giao</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ shipper.total_deliveries }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fa fa-shipping-fast fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Đơn đang giao</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_deliveries|length }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fa fa-motorcycle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Đánh giá
+                                    </div>
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col-auto">
+                                            <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ shipper.rating }}/5</div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="progress progress-sm mr-2">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: {{ shipper.rating|multiply:20 }}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fa fa-star fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Trạng thái</div>
+                                    <div class="h5 mb-0 font-weight-bold {% if shipper.availability_status %}text-success{% else %}text-danger{% endif %}">
+                                        {% if shipper.availability_status %}Đang hoạt động{% else %}Không hoạt động{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fa fa-toggle-{% if shipper.availability_status %}on{% else %}off{% endif %} fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipper Info & Status -->
+            <div class="row mb-5">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Thông tin người giao hàng</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2 text-center">
+                                    <i class="fa fa-user-circle fa-5x text-primary mb-3"></i>
+                                </div>
+                                <div class="col-md-5">
+                                    <h5>{{ shipper.user.first_name }} {{ shipper.user.last_name }}</h5>
+                                    <p><strong>Email:</strong> {{ shipper.user.email }}</p>
+                                    <p><strong>Phương tiện:</strong> {{ shipper.vehicle_type }}</p>
+                                    <p><strong>Biển số:</strong> {{ shipper.vehicle_number }}</p>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6>Thống kê</h6>
+                                            <p><strong>Tổng đơn đã giao:</strong> {{ shipper.total_deliveries }}</p>
+                                            <p><strong>Đánh giá:</strong> 
+                                                <span class="text-warning">
+                                                    {% for i in "12345" %}
+                                                        {% if forloop.counter <= shipper.rating %}
+                                                            <i class="fa fa-star"></i>
+                                                        {% elif forloop.counter <= shipper.rating|add:0.5 %}
+                                                            <i class="fa fa-star-half-alt"></i>
+                                                        {% else %}
+                                                            <i class="far fa-star"></i>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </span>
+                                                {{ shipper.rating }}/5
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Trạng thái</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        {{ availability_form.availability_status }}
+                                        <label class="custom-control-label" for="id_availability_status">
+                                            {% if shipper.availability_status %}
+                                                <span class="text-success">Đang hoạt động</span>
+                                            {% else %}
+                                                <span class="text-danger">Không hoạt động</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_current_location">Vị trí hiện tại</label>
+                                    {{ availability_form.current_location }}
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Cập nhật trạng thái</button>
+                            </form>
+                            <div class="text-center mt-3">
+                                <!-- Nút lấy vị trí hiện tại đã bị xóa -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <!-- Section bản đồ đã được xóa -->
+            
+            <!-- Active Deliveries -->
+            <div class="row mb-5">
+                <div class="col-lg-12">
+                    <div class="card border-0 shadow">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Đơn hàng đang giao ({{ active_deliveries|length }})</h4>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-filter"></i> Lọc
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item active" href="#">Tất cả đơn hàng</a>
+                                    <a class="dropdown-item" href="#">Đang chuẩn bị</a>
+                                    <a class="dropdown-item" href="#">Sẵn sàng lấy hàng</a>
+                                    <a class="dropdown-item" href="#">Đang giao</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% if active_deliveries %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Mã đơn</th>
+                                                <th>Thời gian đặt</th>
+                                                <th>Khách hàng</th>
+                                                <th>Địa chỉ giao</th>
+                                                <th>Món ăn</th>
+                                                <th>Trạng thái</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for delivery in active_deliveries %}
+                                                <tr>
+                                                    <td>#{{ delivery.order.id }}</td>
+                                                    <td>{{ delivery.created_at|date:"d/m/Y H:i" }}</td>
+                                                    <td>{{ delivery.order.customer.user.first_name }}</td>
+                                                    <td>{{ delivery.delivery_address.address_line1 }}, {{ delivery.delivery_address.city }}</td>
+                                                    <td>{{ delivery.order.item.name }}</td>
+                                                    <td>
+                                                        <span class="badge 
+                                                            {% if delivery.status == 'PE' %}badge-secondary
+                                                            {% elif delivery.status == 'CO' %}badge-info
+                                                            {% elif delivery.status == 'PR' %}badge-primary
+                                                            {% elif delivery.status == 'RP' %}badge-warning
+                                                            {% elif delivery.status == 'PU' %}badge-warning
+                                                            {% elif delivery.status == 'OW' %}badge-info
+                                                            {% elif delivery.status == 'DE' %}badge-success
+                                                            {% elif delivery.status == 'CA' %}badge-danger
+                                                            {% endif %}">
+                                                            {{ delivery.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{% url 'delivery_detail' delivery.id %}" class="btn btn-sm btn-primary">
+                                                            <i class="fa fa-eye"></i> Chi tiết
+                                                        </a>
+                                                        <button class="btn btn-sm btn-success update-status-btn" data-delivery-id="{{ delivery.id }}">
+                                                            <i class="fa fa-arrow-circle-right"></i> Cập nhật
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <img src="{% static 'img/no-orders.png' %}" alt="Không có đơn hàng" style="max-width: 120px;">
+                                    <h5 class="mt-3">Không có đơn hàng đang giao</h5>
+                                    <p class="text-muted">Hiện tại bạn không có đơn hàng nào đang giao. Vui lòng đợi đơn hàng mới.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Completed Deliveries -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card border-0 shadow">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Đơn hàng đã hoàn thành gần đây</h4>
+                            <button class="btn btn-sm btn-light" id="view-all-completed">
+                                <i class="fa fa-list"></i> Xem tất cả
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            {% if completed_deliveries %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Mã đơn</th>
+                                                <th>Thời gian giao</th>
+                                                <th>Khách hàng</th>
+                                                <th>Địa chỉ</th>
+                                                <th>Món ăn</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for delivery in completed_deliveries %}
+                                                <tr>
+                                                    <td>#{{ delivery.order.id }}</td>
+                                                    <td>{{ delivery.actual_delivery_time|date:"d/m/Y H:i" }}</td>
+                                                    <td>{{ delivery.order.customer.user.first_name }}</td>
+                                                    <td>{{ delivery.delivery_address.address_line1 }}</td>
+                                                    <td>{{ delivery.order.item.name }}</td>
+                                                    <td>
+                                                        <a href="{% url 'delivery_detail' delivery.id %}" class="btn btn-sm btn-primary">
+                                                            <i class="fa fa-eye"></i> Chi tiết
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <h5>Chưa có đơn hàng nào đã hoàn thành</h5>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Status Modal -->
+            <div class="modal fade" id="updateStatusModal" tabindex="-1" role="dialog" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="updateStatusModalLabel">Cập nhật trạng thái đơn hàng</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form id="status-update-form" method="post" action="">
+                            <div class="modal-body">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="status">Trạng thái mới</label>
+                                    <select class="form-control" id="status" name="status">
+                                        <option value="PR">Đang chuẩn bị</option>
+                                        <option value="RP">Sẵn sàng lấy hàng</option>
+                                        <option value="PU">Đã lấy hàng</option>
+                                        <option value="OW">Đang giao hàng</option>
+                                        <option value="DE">Đã giao hàng</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="location">Vị trí hiện tại</label>
+                                    <input type="text" class="form-control" id="location" name="location">
+                                </div>
+                                <div class="form-group">
+                                    <label for="notes">Ghi chú</label>
+                                    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+<!-- Shipper Dashboard End -->
+{% endblock %}
+
+{% block scripts %}
+<!-- Script bản đồ đã được xóa -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý nút cập nhật trạng thái
+        document.querySelectorAll('.update-status-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var deliveryId = this.getAttribute('data-delivery-id');
+                document.getElementById('status-update-form').action = '/update_delivery_status/' + deliveryId + '/';
+                $('#updateStatusModal').modal('show');
+            });
+        });
+
+        // Nút xem tất cả đơn hàng đã hoàn thành
+        document.getElementById('view-all-completed').addEventListener('click', function() {
+            // Thêm logic để xem tất cả đơn hàng đã hoàn thành
+            alert('Chức năng này đang được phát triển');
+        });
+    });
+</script>
+{% endblock %} 

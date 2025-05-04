@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 position-relative overlay-bottom">
+    <div class="d-flex flex-column align-items-center justify-content-center pt-0 pt-lg-5" style="min-height: 400px">
+        <h1 class="display-4 mb-3 mt-0 mt-lg-5 text-white text-uppercase">Đăng ký người giao hàng</h1>
+        <div class="d-inline-flex mb-lg-5">
+            <p class="m-0 text-white"><a class="text-white" href="{% url 'index' %}">Trang chủ</a></p>
+            <p class="m-0 text-white px-2">/</p>
+            <p class="m-0 text-white">Đăng ký người giao hàng</p>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Register Shipper Start -->
+<div class="container-fluid py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="section-title position-relative mb-4">
+                    <h6 class="d-inline-block position-relative text-secondary text-uppercase pb-2">Tham gia cùng chúng tôi</h6>
+                    <h1 class="display-4">Trở thành người giao hàng cho FoodZone</h1>
+                </div>
+                <p class="mb-4">Bạn muốn kiếm thêm thu nhập và có thời gian linh hoạt? Hãy trở thành đối tác giao hàng của FoodZone. Chúng tôi cung cấp:</p>
+                <ul class="list-inline">
+                    <li><h6><i class="far fa-check-circle text-primary mr-3"></i>Thu nhập hấp dẫn</h6></li>
+                    <li><h6><i class="far fa-check-circle text-primary mr-3"></i>Thời gian làm việc linh hoạt</h6></li>
+                    <li><h6><i class="far fa-check-circle text-primary mr-3"></i>Hỗ trợ xuyên suốt</h6></li>
+                    <li><h6><i class="far fa-check-circle text-primary mr-3"></i>Cơ hội thăng tiến</h6></li>
+                </ul>
+            </div>
+            <div class="col-lg-6 bg-white p-5 rounded">
+                <h2 class="mb-4">Đăng ký thông tin</h2>
+                
+                {% if status %}
+                <div class="alert alert-success">{{ status }}</div>
+                {% endif %}
+                
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="id_first_name">Tên</label>
+                                <input type="text" class="form-control" id="id_first_name" name="first_name" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="id_last_name">Họ</label>
+                                <input type="text" class="form-control" id="id_last_name" name="last_name" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_email">Email</label>
+                        <input type="email" class="form-control" id="id_email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_contact_number">Số điện thoại</label>
+                        <input type="text" class="form-control" id="id_contact_number" name="contact_number" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="id_password">Mật khẩu</label>
+                                <input type="password" class="form-control" id="id_password" name="password" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="id_confirm_password">Xác nhận mật khẩu</label>
+                                <input type="password" class="form-control" id="id_confirm_password" name="confirm_password" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_vehicle_type">Loại phương tiện</label>
+                        <select class="form-control" id="id_vehicle_type" name="vehicle_type" required>
+                            <option value="">-- Chọn loại phương tiện --</option>
+                            <option value="Xe máy">Xe máy</option>
+                            <option value="Xe đạp">Xe đạp</option>
+                            <option value="Ô tô">Ô tô</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_vehicle_number">Biển số xe</label>
+                        <input type="text" class="form-control" id="id_vehicle_number" name="vehicle_number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_license_number">Số giấy phép lái xe</label>
+                        <input type="text" class="form-control" id="id_license_number" name="license_number" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block py-3">Đăng ký</button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Đã có tài khoản? <a href="{% url 'login' %}">Đăng nhập ngay</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Register Shipper End -->
+
+{% endblock %} 

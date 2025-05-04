@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block head %}
+<style>
+    .nav-link{
+        color:#666666 !important;
+    } 
+    .mu-header, nav,header{
+        background-color: black !important;
+    }
+    .payment-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .order-details {
+        margin-bottom: 30px;
+        padding: 15px;
+        background-color: white;
+        border-radius: 5px;
+    }
+    .paypal-button {
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section style="padding-top:100px; padding-bottom: 50px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="text-center mb-4">Xác nhận thanh toán</h2>
+                
+                <div class="payment-container">
+                    <div class="order-details">
+                        <h4>Chi tiết đơn hàng</h4>
+                        <p><strong>Món ăn:</strong> {{ order.item.name }}</p>
+                        <p><strong>Giá:</strong> ${{ order.item.discounted_price }}</p>
+                        <p><strong>Nhà hàng:</strong> {{ order.item.restaurant.name }}</p>
+                        <p><strong>Mô tả:</strong> {{ order.item.description }}</p>
+                    </div>
+                    
+                    <div class="paypal-button">
+                        <h4>Thanh toán qua PayPal</h4>
+                        <p>Hãy nhấn vào nút bên dưới để thanh toán qua PayPal</p>
+                        {{ form.render }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 
