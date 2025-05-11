@@ -1,5 +1,5 @@
 from django.contrib import admin
-from myapp.models import Contact, Category, Team, Dish, Profile, Order, Shipper, DeliveryAddress, Delivery, DeliveryTracking, Restaurant
+from myapp.models import Contact, Category, Team, Dish, Profile, Order, Shipper, DeliveryAddress, Delivery, DeliveryTracking, Restaurant, Cart, CartItem, OrderItem
 
 admin.site.site_header = "FoodZone | Admin"
 
@@ -18,8 +18,13 @@ class DishAdmin(admin.ModelAdmin):
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ["user","contact_number"]
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ["customer", "item", "status", "ordered_on"]
+    list_display = ["customer", "status", "ordered_on"]
+    inlines = [OrderItemInline]
 
 # Admin classes for delivery-related models
 class ShipperAdmin(admin.ModelAdmin):
@@ -62,3 +67,7 @@ admin.site.register(DeliveryAddress, DeliveryAddressAdmin)
 admin.site.register(Delivery, DeliveryAdmin)
 admin.site.register(DeliveryTracking, DeliveryTrackingAdmin)
 admin.site.register(Restaurant)
+
+admin.site.register(Cart)
+admin.site.register(CartItem)
+admin.site.register(OrderItem)

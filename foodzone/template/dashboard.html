@@ -72,6 +72,9 @@
                                 <a href="#tracking" class="nav-link" data-toggle="tab">Theo dõi đơn hàng</a>
                             </li>
                             <li class="nav-item">
+                                <a href="#completed" class="nav-link" data-toggle="tab">Đơn đã giao</a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="{% url 'logout' %}" class="nav-link" >Logout</a>
                             </li>
                         </ul>
@@ -151,44 +154,50 @@
                              <ul class="list-group">
                                 {% for order in orders %}
                                 {% if order.status == True %}
-                                <a href="{% url 'dish' id=order.item.id %}" class="text-decoration-none">
-                                    <li class="list-group-item list-group-item-action">
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <img src="/media/{{order.item.image}}" style="height:70px" class="rounded">
-                                            </div>
-                                             <div class="col-md-6">
-                                                <h4>{{order.item.name}}</h4>
-                                                <p>&dollar; {{order.item.discounted_price}}</p>
-                                                <p class="my-0"><small>INVOICE ID: {{order.invoice_id}}</small></p>
-                                                <p class="font-italic"><small>{{order.ordered_on}}</small></p>
-                                             </div>  
-                                             <div class="col-md-4">
-                                                {% if order.status == True %}
-                                                    <button class="btn btn-success btn-sm">Đã thanh toán</button>
-                                                    
-                                                    {% for delivery in order.delivery_set.all %}
-                                                        {% if delivery.status == 'DE' %}
-                                                            <button class="btn btn-info btn-sm">Đã giao hàng</button>
-                                                            <p class="my-1"><small>Giao ngày: {{ delivery.actual_delivery_time|date:"d/m/Y H:i" }}</small></p>
-                                                        {% elif delivery.status == 'CA' %}
-                                                            <button class="btn btn-danger btn-sm">Đã hủy giao hàng</button>
-                                                        {% else %}
-                                                            <button class="btn btn-warning btn-sm">Đang giao hàng</button>
-                                                            <p class="my-1">
-                                                                <a href="{% url 'track_order' order.id %}" class="btn btn-outline-primary btn-sm">Theo dõi</a>
-                                                            </p>
-                                                        {% endif %}
-                                                    {% empty %}
-                                                        <button class="btn btn-secondary btn-sm">Chờ xử lý</button>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <button class="btn btn-danger btn-sm">Đã hủy</button>
+                                <li class="list-group-item list-group-item-action">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            {% with first_item=order.items.first %}
+                                                {% if first_item %}
+                                                <img src="/media/{{first_item.dish.image}}" style="height:70px" class="rounded">
                                                 {% endif %}
-                                             </div>
+                                            {% endwith %}
                                         </div>
-                                    </li>
-                                </a>
+                                         <div class="col-md-6">
+                                            <h4>Đơn hàng #{{ order.id }}</h4>
+                                            <div>
+                                                {% for order_item in order.items.all %}
+                                                <p>{{ order_item.dish.name }} x {{ order_item.quantity }}</p>
+                                                {% endfor %}
+                                            </div>
+                                            <p class="my-0"><small>INVOICE ID: {{order.invoice_id}}</small></p>
+                                            <p class="font-italic"><small>{{order.ordered_on}}</small></p>
+                                         </div>  
+                                         <div class="col-md-4">
+                                            {% if order.status == True %}
+                                                <button class="btn btn-success btn-sm">Đã thanh toán</button>
+                                                
+                                                {% for delivery in order.delivery_set.all %}
+                                                    {% if delivery.status == 'DE' %}
+                                                        <button class="btn btn-info btn-sm">Đã giao hàng</button>
+                                                        <p class="my-1"><small>Giao ngày: {{ delivery.actual_delivery_time|date:"d/m/Y H:i" }}</small></p>
+                                                    {% elif delivery.status == 'CA' %}
+                                                        <button class="btn btn-danger btn-sm">Đã hủy giao hàng</button>
+                                                    {% else %}
+                                                        <button class="btn btn-warning btn-sm">Đang giao hàng</button>
+                                                        <p class="my-1">
+                                                            <a href="{% url 'track_order' order.id %}" class="btn btn-outline-primary btn-sm">Theo dõi</a>
+                                                        </p>
+                                                    {% endif %}
+                                                {% empty %}
+                                                    <button class="btn btn-secondary btn-sm">Chờ xử lý</button>
+                                                {% endfor %}
+                                            {% else %}
+                                                <button class="btn btn-danger btn-sm">Đã hủy</button>
+                                            {% endif %}
+                                         </div>
+                                    </div>
+                                </li>
                                 {% endif %}
                                 {% endfor %}
                              </ul>
@@ -245,24 +254,29 @@
                                 <h4 class="text-center my-3">Theo dõi đơn hàng</h4>
                                 
                                 <div class="list-group">
-                                    {% for order in pending_orders %}
-                                        <a href="{% url 'track_order' order.id %}" class="list-group-item list-group-item-action">
-                                            <div class="d-flex w-100 justify-content-between">
-                                                <h5 class="mb-1">Đơn hàng #{{ order.id }} - {{ order.item.name }}</h5>
-                                                <small>{{ order.ordered_on|date:"d/m/Y H:i" }}</small>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <p class="mb-1">
-                                                    <img src="/media/{{order.item.image}}" alt="{{ order.item.name }}" class="rounded" style="height: 50px; margin-right: 10px;">
-                                                    Giá: {{ order.item.discounted_price }}₫
-                                                </p>
-                                                <span class="badge badge-primary badge-pill">Theo dõi</span>
-                                            </div>
-                                        </a>
-                                    {% empty %}
-                                        <div class="alert alert-info text-center">
-                                            <p>Bạn không có đơn hàng nào đang giao.</p>
+                                    {% for pending_order in pending_orders %}
+                                    <a href="{% url 'track_order' pending_order.id %}" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">Đơn hàng #{{ pending_order.id }}</h5>
+                                            <small>{{ pending_order.ordered_on|date:"d/m/Y H:i" }}</small>
                                         </div>
+                                        <div class="d-flex align-items-center">
+                                            {% with first_item=pending_order.items.first %}
+                                                {% if first_item %}
+                                                <img src="/media/{{first_item.dish.image}}" alt="{{ first_item.dish.name }}" class="rounded" style="height: 50px; margin-right: 10px;">
+                                                {% endif %}
+                                            {% endwith %}
+                                            <div>
+                                                {% for order_item in pending_order.items.all %}
+                                                <p class="mb-1">{{ order_item.dish.name }} x {{ order_item.quantity }} - {{ order_item.price|floatformat:0 }}₫</p>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% empty %}
+                                    <div class="list-group-item text-center">
+                                        <p class="mb-0">Bạn không có đơn hàng nào đang giao</p>
+                                    </div>
                                     {% endfor %}
                                 </div>
                                 
@@ -270,6 +284,39 @@
                                     <a href="{% url 'register_shipper' %}" class="btn custom-btn">
                                         <i class="fa fa-motorcycle"></i> Trở thành người giao hàng
                                     </a>
+                                </div>
+                            </div>
+
+                            <!-- Tab Đơn hàng đã giao -->
+                            <div class="tab-pane" id="completed">
+                                <h4 class="text-center my-3">Đơn hàng đã giao</h4>
+                                
+                                <div class="list-group">
+                                    {% for completed_order in completed_orders %}
+                                    <a href="{% url 'track_order' completed_order.id %}" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">Đơn hàng #{{ completed_order.id }}</h5>
+                                            <small>{{ completed_order.ordered_on|date:"d/m/Y H:i" }}</small>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            {% with first_item=completed_order.items.first %}
+                                                {% if first_item %}
+                                                <img src="/media/{{first_item.dish.image}}" alt="{{ first_item.dish.name }}" class="rounded" style="height: 50px; margin-right: 10px;">
+                                                {% endif %}
+                                            {% endwith %}
+                                            <div>
+                                                {% for order_item in completed_order.items.all %}
+                                                <p class="mb-1">{{ order_item.dish.name }} x {{ order_item.quantity }} - {{ order_item.price|floatformat:0 }}₫</p>
+                                                {% endfor %}
+                                            </div>
+                                            <span class="badge badge-success badge-pill ml-auto">Đã giao</span>
+                                        </div>
+                                    </a>
+                                    {% empty %}
+                                    <div class="list-group-item text-center">
+                                        <p class="mb-0">Bạn chưa có đơn hàng nào đã giao</p>
+                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
 

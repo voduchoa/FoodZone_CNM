@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load cart_extras %}
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">Giỏ hàng của bạn</h2>
+  {% if items %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Món ăn</th>
+          <th>Hình ảnh</th>
+          <th>Giá</th>
+          <th>Số lượng</th>
+          <th>Thành tiền</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.dish.name }}</td>
+          <td><img src="{{ item.dish.image.url }}" width="60"></td>
+          <td>{{ item.dish.price|floatformat:0 }}đ</td>
+          <td>
+            <div class="input-group" style="width: 120px;">
+              <div class="input-group-prepend">
+                <form method="post" action="{% url 'update_quantity' item.id 'decrease' %}" class="m-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
+                </form>
+              </div>
+              <input type="text" class="form-control text-center" value="{{ item.quantity }}" readonly>
+              <div class="input-group-append">
+                <form method="post" action="{% url 'update_quantity' item.id 'increase' %}" class="m-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                </form>
+              </div>
+            </div>
+          </td>
+          <td>{{ item.dish.price|floatformat:0|multiply:item.quantity }}đ</td>
+          <td>
+            <form method="post" action="{% url 'remove_from_cart' item.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="table-dark">
+          <td colspan="4" class="text-right font-weight-bold">Tổng thanh toán:</td>
+          <td class="font-weight-bold">{{ total_price|floatformat:0 }}đ</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    
+    <div class="mt-4">
+      <form method="post" action="{% url 'checkout_cart' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Đặt hàng</button>
+        <a href="{% url 'all_dishes' %}" class="btn btn-outline-primary ml-2">Tiếp tục mua sắm</a>
+      </form>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <p>Giỏ hàng trống.</p>
+      <a href="{% url 'all_dishes' %}" class="btn btn-primary mt-2">Tiếp tục mua sắm</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %} 

@@ -19,12 +19,20 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('dish/<int:id>/', views.single_dish, name='dish'),
 
+    # Chatbot URLs
+    path('chatbot/', views.chatbot, name='chatbot'),
+    path('chatbot/query/', views.chatbot_query, name='chatbot_query'),
+
     # Chức năng người giao hàng
     path('register_shipper/', views.register_shipper, name='register_shipper'),
     path('shipper_dashboard/', views.shipper_dashboard, name='shipper_dashboard'),
     path('update_delivery_status/<int:delivery_id>/', views.update_delivery_status, name='update_delivery_status'),
     path('delivery_detail/<int:delivery_id>/', views.delivery_detail, name='delivery_detail'),
     path('update_location/', views.update_location, name='update_location'),
+    
+    # Chức năng nhà hàng
+    path('register_restaurant/', views.register_restaurant, name='register_restaurant'),
+    path('restaurant_dashboard/', views.restaurant_dashboard, name='restaurant_dashboard'),
     
     # Chức năng địa chỉ giao hàng
     path('manage_addresses/', views.manage_addresses, name='manage_addresses'),
@@ -40,4 +48,5 @@ urlpatterns = [
     
     # Payment URL
     
+    path('', include('myapp.urls')),
 ]+static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

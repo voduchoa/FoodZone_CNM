@@ -41,15 +41,15 @@
                     <div class="navbar-nav mx-auto">
                         <a href="{% url 'index' %}" class="nav-item nav-link active">Trang chủ</a>
                         <a href="{% url 'about' %}" class="nav-item nav-link">Giới thiệu</a>
-                        <a href="feature.html" class="nav-item nav-link">Đội ngũ</a>
-                        <a href="team.html" class="nav-item nav-link">Đầu bếp</a>
-                        <a href="menu.html" class="nav-item nav-link">Thực đơn</a>
-                        <a href="booking.html" class="nav-item nav-link">Đặt bàn</a>
+                        <a href="{% url 'team' %}" class="nav-item nav-link">Đội ngũ</a>
+                        <a href="{% url 'team' %}" class="nav-item nav-link">Đầu bếp</a>
+                        <a href="{% url 'all_dishes' %}" class="nav-item nav-link">Thực đơn</a>
+                        <a href="#" class="nav-item nav-link">Đặt bàn</a>
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fas fa-user"></i></a>
                             <div class="dropdown-menu">
-                                <a href="blog.html" class="dropdown-item">Bài viết</a>
-                                <a href="single.html" class="dropdown-item">Chi tiết</a>
+                                <a href="{% url 'index' %}" class="dropdown-item">Bài viết</a>
+                                <a href="{% url 'index' %}" class="dropdown-item">Chi tiết</a>
                             </div>
                         </div>
                         <a href="{% url 'contact' %}" class="nav-link" ><i class="fas fa-user"></i></a>

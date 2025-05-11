@@ -1,0 +1,625 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<style>
+    .chat-container {
+        width: 100%;
+        max-width: 1200px; /* Tăng lại kích thước để có không gian cho sidebar */
+        margin: 0 auto;
+        padding: 15px;
+    }
+    
+    .chat-layout {
+        display: flex;
+        gap: 15px;
+    }
+    
+    .chat-sidebar {
+        width: 250px;
+        flex-shrink: 0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow-y: auto;
+        max-height: 350px;
+        background-color: #f9f9f9;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .chat-sidebar-header {
+        padding: 10px;
+        background-color: #FEA116;
+        color: white;
+        font-weight: bold;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .chat-history-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .chat-history-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        font-size: 13px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .chat-history-item:hover {
+        background-color: #f0f0f0;
+    }
+    
+    .chat-history-item.active {
+        background-color: #e8e8e8;
+        font-weight: bold;
+    }
+    
+    .chat-main {
+        flex-grow: 1;
+    }
+    
+    .chat-box {
+        height: 350px; /* Reduced from 400px */
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+        background-color: #f9f9f9;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .message {
+        margin-bottom: 12px;
+        padding: 8px 12px;
+        border-radius: 15px;
+        max-width: 80%;
+        font-size: 14px; /* Added smaller font size */
+    }
+    
+    .user-message {
+        background-color: #FEA116;
+        color: white;
+        margin-left: auto;
+    }
+    
+    .bot-message {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        margin-right: auto;
+    }
+    
+    .chat-input {
+        display: flex;
+        margin-bottom: 10px;
+    }
+    
+    .chat-input input {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px 0 0 5px;
+    }
+    
+    .chat-input button {
+        padding: 10px 15px;
+        background-color: #FEA116;
+        border: none;
+        color: white;
+        border-radius: 0 5px 5px 0;
+        cursor: pointer;
+    }
+
+    .chat-input button:hover {
+        background-color: #e89113;
+    }
+
+    .message-content {
+        white-space: pre-wrap;
+    }
+
+    .typing-indicator {
+        display: none;
+        margin-bottom: 12px;
+    }
+
+    .typing-indicator span {
+        height: 8px;
+        width: 8px;
+        float: left;
+        margin: 0 1px;
+        background-color: #9E9EA1;
+        display: block;
+        border-radius: 50%;
+        opacity: 0.4;
+    }
+
+    .typing-indicator span:nth-of-type(1) {
+        animation: 1s blink infinite 0.3333s;
+    }
+
+    .typing-indicator span:nth-of-type(2) {
+        animation: 1s blink infinite 0.6666s;
+    }
+
+    .typing-indicator span:nth-of-type(3) {
+        animation: 1s blink infinite 0.9999s;
+    }
+
+    @keyframes blink {
+        50% {
+            opacity: 1;
+        }
+    }
+    
+    /* New styles for chat controls */
+    .chat-controls {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .control-button {
+        padding: 8px 15px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background-color 0.2s;
+    }
+    
+    .control-button:hover {
+        background-color: #5a6268;
+    }
+    
+    .control-button.new-chat {
+        background-color: #28a745;
+    }
+    
+    .control-button.new-chat:hover {
+        background-color: #218838;
+    }
+    
+    .control-button.clear-history {
+        background-color: #dc3545;
+    }
+    
+    .control-button.clear-history:hover {
+        background-color: #c82333;
+    }
+    
+    /* Show/hide sidebar on mobile */
+    .toggle-sidebar {
+        display: none;
+        margin-right: 10px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .chat-container {
+            padding: 10px;
+        }
+        
+        .message {
+            font-size: 13px;
+            padding: 7px 10px;
+        }
+        
+        .chat-layout {
+            flex-direction: column;
+        }
+        
+        .chat-sidebar {
+            width: 100%;
+            margin-bottom: 15px;
+            max-height: 200px;
+            display: none;
+        }
+        
+        .chat-sidebar.visible {
+            display: block;
+        }
+        
+        .toggle-sidebar {
+            display: block;
+        }
+    }
+    
+    /* No message placeholder */
+    .no-messages {
+        text-align: center;
+        color: #6c757d;
+        padding: 20px;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header Start -->
+<div class="page-header mb-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2>Tư vấn</h2>
+            </div>
+            <div class="col-12">
+                <a href="{% url 'index' %}">Trang chủ</a>
+                <a href="{% url 'chatbot' %}">Tư vấn</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Chatbot Start -->
+<div class="chat-container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 class="mb-3">Tư vấn về món ăn và dịch vụ</h3>
+            <p class="mb-3">Chào mừng bạn đến với trợ lý ảo của FoodZone! Hỏi về thực đơn, giá cả, đội ngũ đầu bếp hoặc bất kỳ thắc mắc nào khác.</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- Mobile Sidebar Toggle -->
+            <button id="toggleSidebarButton" class="control-button toggle-sidebar">
+                <i class="fas fa-history"></i> Hiện lịch sử
+            </button>
+            
+            <!-- Chat layout with sidebar -->
+            <div class="chat-layout">
+                <!-- Chat History Sidebar -->
+                <div class="chat-sidebar" id="chatSidebar">
+                    <div class="chat-sidebar-header">
+                        Lịch sử trò chuyện
+                    </div>
+                    <ul class="chat-history-list" id="chatHistoryList">
+                        <!-- Chat history items will be added here -->
+                    </ul>
+                </div>
+                
+                <!-- Main Chat Area -->
+                <div class="chat-main">
+                    <!-- Chat controls -->
+                    <div class="chat-controls">
+                        <button id="newChatButton" class="control-button new-chat">
+                            <i class="fas fa-plus-circle"></i> Tạo mới
+                        </button>
+                        <button id="clearHistoryButton" class="control-button clear-history">
+                            <i class="fas fa-trash-alt"></i> Xóa lịch sử
+                        </button>
+                    </div>
+                    
+                    <div class="chat-box" id="chatBox">
+                        <div class="typing-indicator" id="typingIndicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="userInput" placeholder="Nhập câu hỏi của bạn..." />
+                        <button id="sendButton">Gửi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Chatbot End -->
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const newChatButton = document.getElementById('newChatButton');
+        const clearHistoryButton = document.getElementById('clearHistoryButton');
+        const chatHistoryList = document.getElementById('chatHistoryList');
+        const toggleSidebarButton = document.getElementById('toggleSidebarButton');
+        const chatSidebar = document.getElementById('chatSidebar');
+        
+        // Chat history management
+        const STORAGE_KEY = 'foodzone_chat_history';
+        const CURRENT_CHAT_KEY = 'foodzone_current_chat';
+        
+        // Initialize chat history
+        let chatHistory = {};
+        let currentChatId = localStorage.getItem(CURRENT_CHAT_KEY);
+        
+        // Toggle sidebar on mobile
+        toggleSidebarButton.addEventListener('click', function() {
+            chatSidebar.classList.toggle('visible');
+            const isVisible = chatSidebar.classList.contains('visible');
+            toggleSidebarButton.innerHTML = isVisible ? 
+                '<i class="fas fa-times"></i> Ẩn lịch sử' : 
+                '<i class="fas fa-history"></i> Hiện lịch sử';
+        });
+        
+        // Format date for chat history
+        function formatDate(timestamp) {
+            const date = new Date(parseInt(timestamp.split('_')[1]));
+            return date.toLocaleString('vi-VN', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+        
+        // Get preview text from chat history
+        function getChatPreview(chatId) {
+            if (!chatHistory[chatId] || chatHistory[chatId].length === 0) {
+                return "Cuộc trò chuyện mới";
+            }
+            
+            // Find the first user message if exists
+            const userMessage = chatHistory[chatId].find(msg => msg.isUser);
+            if (userMessage) {
+                return userMessage.content.substring(0, 30) + (userMessage.content.length > 30 ? '...' : '');
+            }
+            
+            // Otherwise return first bot message
+            return chatHistory[chatId][0].content.substring(0, 30) + 
+                (chatHistory[chatId][0].content.length > 30 ? '...' : '');
+        }
+        
+        // Update chat history sidebar
+        function updateChatHistorySidebar() {
+            // Clear existing items
+            chatHistoryList.innerHTML = '';
+            
+            // Get all chat IDs and sort by timestamp (newest first)
+            const chatIds = Object.keys(chatHistory).sort((a, b) => {
+                const timestampA = parseInt(a.split('_')[1]);
+                const timestampB = parseInt(b.split('_')[1]);
+                return timestampB - timestampA;
+            });
+            
+            if (chatIds.length === 0) {
+                const noChats = document.createElement('li');
+                noChats.className = 'chat-history-item';
+                noChats.textContent = 'Không có lịch sử trò chuyện';
+                chatHistoryList.appendChild(noChats);
+                return;
+            }
+            
+            // Add each chat to the sidebar
+            chatIds.forEach(chatId => {
+                const chatItem = document.createElement('li');
+                chatItem.className = 'chat-history-item';
+                if (chatId === currentChatId) {
+                    chatItem.classList.add('active');
+                }
+                
+                const chatDate = document.createElement('div');
+                chatDate.style.fontSize = '11px';
+                chatDate.style.color = '#666';
+                chatDate.textContent = formatDate(chatId);
+                
+                const chatPreview = document.createElement('div');
+                chatPreview.textContent = getChatPreview(chatId);
+                
+                chatItem.appendChild(chatPreview);
+                chatItem.appendChild(chatDate);
+                
+                chatItem.addEventListener('click', () => {
+                    // Switch to this chat
+                    currentChatId = chatId;
+                    localStorage.setItem(CURRENT_CHAT_KEY, currentChatId);
+                    
+                    // Update UI
+                    displayCurrentChat();
+                    updateChatHistorySidebar();
+                });
+                
+                chatHistoryList.appendChild(chatItem);
+            });
+        }
+        
+        // Load chat history from localStorage
+        function loadChatHistory() {
+            const storedHistory = localStorage.getItem(STORAGE_KEY);
+            if (storedHistory) {
+                chatHistory = JSON.parse(storedHistory);
+            }
+            
+            // If no current chat or current chat doesn't exist in history, create a new one
+            if (!currentChatId || !chatHistory[currentChatId]) {
+                createNewChat();
+            } else {
+                // Load current chat
+                displayCurrentChat();
+            }
+            
+            // Update sidebar
+            updateChatHistorySidebar();
+        }
+        
+        // Save chat history to localStorage
+        function saveChatHistory() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
+            localStorage.setItem(CURRENT_CHAT_KEY, currentChatId);
+            updateChatHistorySidebar();
+        }
+        
+        // Create a new chat
+        function createNewChat() {
+            // Generate new chat ID
+            currentChatId = 'chat_' + Date.now();
+            
+            // Initialize new chat
+            chatHistory[currentChatId] = [{
+                content: "Xin chào! Tôi là trợ lý ảo của FoodZone. Bạn cần tôi tư vấn gì về thực đơn hoặc dịch vụ của chúng tôi?",
+                isUser: false
+            }];
+            
+            // Save to localStorage
+            saveChatHistory();
+            
+            // Display the new chat
+            displayCurrentChat();
+            
+            // Update sidebar
+            updateChatHistorySidebar();
+        }
+        
+        // Display current chat
+        function displayCurrentChat() {
+            // Clear chat box (except typing indicator)
+            while (chatBox.firstChild && chatBox.firstChild !== typingIndicator) {
+                chatBox.removeChild(chatBox.firstChild);
+            }
+            
+            // Add messages from current chat
+            if (chatHistory[currentChatId]) {
+                chatHistory[currentChatId].forEach(msg => {
+                    addMessageToUI(msg.content, msg.isUser);
+                });
+            }
+        }
+        
+        // Clear chat history
+        function clearHistory() {
+            if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử chat?')) {
+                chatHistory = {};
+                localStorage.removeItem(STORAGE_KEY);
+                createNewChat();
+            }
+        }
+        
+        // Function to add messages to the chat box UI
+        function addMessageToUI(content, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = isUser ? 'message user-message' : 'message bot-message';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(contentDiv);
+            
+            // Add message before the typing indicator
+            chatBox.insertBefore(messageDiv, typingIndicator);
+            
+            // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
+        // Function to add message to chat history and UI
+        function addMessage(content, isUser) {
+            // Add to UI
+            addMessageToUI(content, isUser);
+            
+            // Add to chat history
+            if (chatHistory[currentChatId]) {
+                chatHistory[currentChatId].push({
+                    content: content,
+                    isUser: isUser
+                });
+                
+                // Save to localStorage
+                saveChatHistory();
+            }
+        }
+        
+        // Function to show typing indicator
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
+        // Function to hide typing indicator
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+        
+        // Function to send message to backend
+        function sendMessage() {
+            const message = userInput.value.trim();
+            
+            if (message) {
+                // Add user message to chat
+                addMessage(message, true);
+                
+                // Clear input
+                userInput.value = '';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Send message to backend
+                fetch('/chatbot/query/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide typing indicator
+                    hideTypingIndicator();
+                    
+                    // Add bot response to chat
+                    addMessage(data.response, false);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    hideTypingIndicator();
+                    addMessage('Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại sau.', false);
+                });
+            }
+        }
+        
+        // Event listener for send button
+        sendButton.addEventListener('click', sendMessage);
+        
+        // Event listener for Enter key
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Event listener for new chat button
+        newChatButton.addEventListener('click', createNewChat);
+        
+        // Event listener for clear history button
+        clearHistoryButton.addEventListener('click', clearHistory);
+        
+        // Function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Initialize chat history on page load
+        loadChatHistory();
+    });
+</script>
+{% endblock %} 

@@ -244,7 +244,11 @@
                                                     <td>{{ delivery.created_at|date:"d/m/Y H:i" }}</td>
                                                     <td>{{ delivery.order.customer.user.first_name }}</td>
                                                     <td>{{ delivery.delivery_address.address_line1 }}, {{ delivery.delivery_address.city }}</td>
-                                                    <td>{{ delivery.order.item.name }}</td>
+                                                    <td>
+                                                        {% for order_item in delivery.order.items.all %}
+                                                            {{ order_item.dish.name }}{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    </td>
                                                     <td>
                                                         <span class="badge 
                                                             {% if delivery.status == 'PE' %}badge-secondary
@@ -315,7 +319,11 @@
                                                     <td>{{ delivery.actual_delivery_time|date:"d/m/Y H:i" }}</td>
                                                     <td>{{ delivery.order.customer.user.first_name }}</td>
                                                     <td>{{ delivery.delivery_address.address_line1 }}</td>
-                                                    <td>{{ delivery.order.item.name }}</td>
+                                                    <td>
+                                                        {% for order_item in delivery.order.items.all %}
+                                                            {{ order_item.dish.name }}{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    </td>
                                                     <td>
                                                         <a href="{% url 'delivery_detail' delivery.id %}" class="btn btn-sm btn-primary">
                                                             <i class="fa fa-eye"></i> Chi tiết
@@ -382,7 +390,60 @@
 <!-- Shipper Dashboard End -->
 {% endblock %}
 
-{% block scripts %}
+<div class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-7">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="footer-contact">
+                            <h2>Địa chỉ của chúng tôi</h2>
+                            <p><i class="fa fa-map-marker-alt"></i>1 Nguyễn Văn Bảo, Gò Vấp, Tp.HCM</p>
+                            <p><i class="fa fa-phone-alt"></i>+012 345 67890</p>
+                            <p><i class="fa fa-envelope"></i>voduchoa4444@gmail.com</p>
+                            <div class="footer-social">
+                                <a href=""><i class="fab fa-twitter"></i></a>
+                                <a href=""><i class="fab fa-facebook-f"></i></a>
+                                <a href=""><i class="fab fa-youtube"></i></a>
+                                <a href=""><i class="fab fa-instagram"></i></a>
+                                <a href=""><i class="fab fa-linkedin-in"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-link">
+                            <h2>Liên kết nhanh</h2>
+                            <a href="">Điều khoản sử dụng</a>
+                            <a href="">Chính sách bảo mật</a>
+                            <a href="">Cookies</a>
+                            <a href="">Trợ giúp</a>
+                            <a href="">Câu hỏi thường gặp</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="footer-newsletter">
+                    <h2>Bản tin</h2>
+                    <p>
+                        Chúng tôi cung cấp các sản phẩm chất lượng cao và dịch vụ tuyệt vời. Mục tiêu của chúng tôi là mang đến sự hài lòng cho khách hàng thông qua các giải pháp sáng tạo và hiệu quả. Đội ngũ của chúng tôi luôn nỗ lực để đạt được sự xuất sắc trong từng dự án và đảm bảo sự thành công lâu dài cho đối tác
+                    </p>
+                    <div class="form">
+                        <input class="form-control" placeholder="Email goes here">
+                        <button class="btn custom-btn">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        <div class="container">
+            <p>Bản quyền © <a href="#">Food Zone</a>, Bảo lưu mọi quyền. Thiết kế bởi <a href="https://htmlcodex.com">HTML Codex</a></p>
+        </div>
+    </div>
+</div>
+
+{% block script %}
 <!-- Script bản đồ đã được xóa -->
 
 <script>

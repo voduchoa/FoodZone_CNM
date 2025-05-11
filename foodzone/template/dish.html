@@ -43,9 +43,9 @@
                     </p>
                     <h4 class="menu-text" style="font-weight: normal;">
                         {% if dish.price != dish.discounted_price %}
-                            <strong><del>&dollar;{{dish.price}}</del></strong>
+                            <strong><del>{{dish.price|floatformat:0}}₫</del></strong>
                         {% endif %}
-                            <strong>&dollar;{{dish.discounted_price}}</strong>
+                            <strong>{{dish.discounted_price|floatformat:0}}₫</strong>
                     </h4>
                     <p>
                         <script>
@@ -63,6 +63,7 @@
                             <div class="paypal-button mt-3">
                                 <h4>Thanh toán qua PayPal</h4>
                                 <p>Hãy nhấn vào nút bên dưới để thanh toán qua PayPal</p>
+                                <p class="text-info"><small><i>Lưu ý: PayPal sẽ hiển thị giá trị bằng USD (tương đương với {{dish.discounted_price|floatformat:0}}₫)</i></small></p>
                                 {{form.render}}
                             </div>
                         {% else %}
@@ -70,6 +71,12 @@
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-success btn-lg btn-block">
                                     <i class="fa fa-shopping-cart"></i> Đặt hàng ngay
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'add_to_cart' dish.id %}" class="mt-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-lg btn-block">
+                                    <i class="fa fa-cart-plus"></i> Thêm vào giỏ
                                 </button>
                             </form>
                         {% endif %}

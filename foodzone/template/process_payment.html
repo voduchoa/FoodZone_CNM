@@ -39,7 +39,7 @@
                     <div class="order-details">
                         <h4>Chi tiết đơn hàng</h4>
                         <p><strong>Món ăn:</strong> {{ order.item.name }}</p>
-                        <p><strong>Giá:</strong> ${{ order.item.discounted_price }}</p>
+                        <p><strong>Giá:</strong> {{ order.item.discounted_price|floatformat:0 }}₫</p>
                         <p><strong>Nhà hàng:</strong> {{ order.item.restaurant.name }}</p>
                         <p><strong>Mô tả:</strong> {{ order.item.description }}</p>
                     </div>
@@ -47,6 +47,7 @@
                     <div class="paypal-button">
                         <h4>Thanh toán qua PayPal</h4>
                         <p>Hãy nhấn vào nút bên dưới để thanh toán qua PayPal</p>
+                        <p class="text-info"><small><i>Lưu ý: PayPal sẽ hiển thị giá trị bằng USD (tương đương với số tiền VND hiển thị ở trên)</i></small></p>
                         {{ form.render }}
                     </div>
                 </div>

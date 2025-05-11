@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load cart_extras %}
+{% block head %}
+<style>
+    .nav-link{
+        color:#666666 !important;
+    } 
+    .mu-header, nav,header{
+        background-color: black !important;
+    }
+    .payment-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .order-details {
+        margin-bottom: 30px;
+        padding: 15px;
+        background-color: white;
+        border-radius: 5px;
+    }
+    .paypal-button {
+        text-align: center;
+        margin-top: 20px;
+    }
+    .order-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    .total-row {
+        font-weight: bold;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid #ddd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section style="padding-top:100px; padding-bottom: 50px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="text-center mb-4">Xác nhận thanh toán đơn hàng #{{ order.id }}</h2>
+                
+                <div class="payment-container">
+                    <div class="order-details">
+                        <h4>Chi tiết đơn hàng</h4>
+                        
+                        {% for item in order_items %}
+                        <div class="order-item">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <img src="{{ item.dish.image.url }}" class="img-fluid" style="max-height: 80px;">
+                                </div>
+                                <div class="col-md-9">
+                                    <h5>{{ item.dish.name }}</h5>
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Đơn giá:</strong> {{ item.price|floatformat:0 }}đ</span>
+                                        <span><strong>Số lượng:</strong> {{ item.quantity }}</span>
+                                        <span><strong>Thành tiền:</strong> {{ item.price|multiply:item.quantity|floatformat:0 }}đ</span>
+                                    </div>
+                                    {% if item.dish.restaurant %}
+                                    <p><strong>Nhà hàng:</strong> {{ item.dish.restaurant.name }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="total-row">
+                            <div class="d-flex justify-content-between">
+                                <span>Tổng thanh toán:</span>
+                                <span>{{ total_amount|floatformat:0 }}đ</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="paypal-button">
+                        <h4>Thanh toán qua PayPal</h4>
+                        <p>Hãy nhấn vào nút bên dưới để thanh toán qua PayPal</p>
+                        <p class="text-info"><small><i>Lưu ý: PayPal sẽ hiển thị giá trị bằng USD (tương đương với {{ total_amount|floatformat:0 }}đ)</i></small></p>
+                        {{ form.render }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

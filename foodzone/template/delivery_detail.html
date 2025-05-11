@@ -77,13 +77,18 @@
                             </div>
                             <div class="col-md-6">
                                 <h5>Thông tin món ăn</h5>
-                                <div class="d-flex align-items-center">
-                                    <img src="{{ delivery.order.item.image.url }}" alt="{{ delivery.order.item.name }}" class="img-fluid rounded mr-3" style="max-width: 80px;">
+                                {% for order_item in delivery.order.items.all %}
+                                <div class="d-flex align-items-center mb-2">
+                                    <img src="{{ order_item.dish.image.url }}" alt="{{ order_item.dish.name }}" class="img-fluid rounded mr-3" style="max-width: 80px;">
                                     <div>
-                                        <h6>{{ delivery.order.item.name }}</h6>
-                                        <p class="mb-0">Giá: {{ delivery.order.item.discounted_price }}₫</p>
+                                        <h6>{{ order_item.dish.name }}</h6>
+                                        <p class="mb-0">Số lượng: {{ order_item.quantity }}</p>
+                                        <p class="mb-0">Giá: {{ order_item.price|floatformat:0 }}₫</p>
                                     </div>
                                 </div>
+                                {% empty %}
+                                <p>Không có thông tin món ăn</p>
+                                {% endfor %}
                             </div>
                         </div>
                         

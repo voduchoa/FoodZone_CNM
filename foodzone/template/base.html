@@ -43,6 +43,7 @@
                         <a href="{% url 'about' %}" class="nav-item nav-link">Giới thiệu</a>
                         <a href="{% url 'team' %}" class="nav-item nav-link">Đội ngũ</a>
                         <a href="{% url 'all_dishes' %}" class="nav-item nav-link">Thực đơn</a>
+                        <a href="{% url 'chatbot' %}" class="nav-item nav-link">Tư vấn</a>
                         <a href="{% url 'contact' %}" class="nav-item nav-link">Liên hệ</a>
                         {% if user.is_authenticated %}
                         <div class="nav-item dropdown">
@@ -52,13 +53,25 @@
                                 <a href="{% url 'admin:index' %}" class="dropdown-item">Quản trị</a>
                             {% else %}
                                 <a href="{% url 'dashboard' %}" class="dropdown-item">Trang cá nhân</a>
+                                {% if user.shipper %}
                                 <a href="{% url 'shipper_dashboard' %}" class="dropdown-item">Trang giao hàng</a>
+                                {% elif user.restaurant %}
+                                <a href="{% url 'restaurant_dashboard' %}" class="dropdown-item">Trang quản lý nhà hàng</a>
+                                {% endif %}
                             {% endif %}
                                 <a href="{% url 'logout' %}" class="dropdown-item">Đăng xuất</a>
                             </div>
                         </div>
                         {% else %}
-                        <a href="{% url 'register' %}" class="nav-link" ><i class="fas fa-user"></i></a>
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Đăng ký</a>
+                            <div class="dropdown-menu">
+                                <a href="{% url 'register' %}" class="dropdown-item">Khách hàng</a>
+                                <a href="{% url 'register_shipper' %}" class="dropdown-item">Shipper</a>
+                                <a href="{% url 'register_restaurant' %}" class="dropdown-item">Nhà hàng</a>
+                            </div>
+                        </div>
+                        <a href="{% url 'login' %}" class="nav-item nav-link">Đăng nhập</a>
                         {% endif %}
                     </div>
                 </div>

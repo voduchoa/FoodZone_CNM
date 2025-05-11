@@ -73,14 +73,13 @@ class Profile(models.Model):
 
 class Order(models.Model):
     customer = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    item = models.ForeignKey(Dish, on_delete=models.CASCADE)
     status = models.BooleanField(default=False)
     invoice_id = models.CharField(max_length=100, blank=True)
     payer_id = models.CharField(max_length=100, blank=True)
     ordered_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.customer.user.first_name
+        return f"Đơn hàng #{self.id} - {self.customer.user.first_name}"
 
     class Meta:
         verbose_name_plural = "Order Table"
@@ -198,3 +197,46 @@ class Restaurant(models.Model):
     
     class Meta:
         verbose_name_plural = "Restaurant Table"
+
+class DeliveryReview(models.Model):
+    delivery = models.OneToOneField(Delivery, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField(default=5)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review for Delivery #{self.delivery.id} by {self.customer.user.first_name}"
+
+    class Meta:
+        verbose_name_plural = "Delivery Review Table"
+
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.user:
+            return f"Cart of {self.user.username}"
+        return f"Cart (session: {self.session_key})"
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.dish.name} x {self.quantity}"
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.FloatField()  # Lưu giá tại thời điểm đặt hàng
+    
+    def __str__(self):
+        return f"{self.dish.name} x {self.quantity} in Order #{self.order.id}"
+        
+    class Meta:
+        verbose_name_plural = "Order Item Table"
